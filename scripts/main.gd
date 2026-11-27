@@ -10,7 +10,12 @@ const GameState := preload("res://scripts/game_state.gd")
 const ReportUI := preload("res://scripts/report_ui.gd")
 const ReturnPoint := preload("res://scripts/return_point.gd")
 const ReportLogic := preload("res://scripts/report_logic.gd")
+const SaveGame := preload("res://scripts/save_game.gd")
+const PauseMenu := preload("res://scripts/pause_menu.gd")
+const InfoPanel := preload("res://scripts/info_panel.gd")
+const UiKit := preload("res://scripts/ui_kit.gd")
 
+const TITLE_SCENE := "res://scenes/title.tscn"
 const LEVEL_WIDTH := 1800
 const FLOOR_Y := 240
 
@@ -22,6 +27,8 @@ var toast: Label
 var _toast_tween: Tween
 var _notebook: CanvasLayer
 var _report: CanvasLayer
+var _pause: CanvasLayer
+var _guide: CanvasLayer
 
 
 func _ready() -> void:
@@ -114,6 +121,62 @@ func _unhandled_input(event: InputEvent) -> void:
 		_update_hint()
 	elif event.is_action_pressed("notebook") and not get_tree().paused:
 		_open_notebook()
+	elif event.is_action_pressed("ui_cancel") and not get_tree().paused:
+		_open_pause()
+
+
+# ---------------------------------------------------------------- 일시정지·조작 안내
+
+func _open_pause() -> void:
+	if _pause != null:
+		return
+	_pause = PauseMenu.new()
+	_pause.name = "PauseMenu"
+	add_child(_pause)
+	_pause.setup()
+	_pause.resumed.connect(_close_pause)
+	_pause.to_title.connect(_go_title)
+	_pause.quit_game.connect(_quit_game)
+	get_tree().paused = true
+
+
+func _close_pause() -> void:
+	if _pause:
+		_pause.queue_free()
+		_pause = null
+	get_tree().paused = false
+
+
+func _go_title() -> void:
+	SaveGame.autosave()
+	get_tree().paused = false
+	get_tree().change_scene_to_file(TITLE_SCENE)
+
+
+func _quit_game() -> void:
+	SaveGame.autosave()
+	get_tree().quit()
+
+
+## 처음 한 번 조작 안내를 보여 준다. 닫으면 다시 게임으로 돌아간다.
+func _show_guide() -> void:
+	if _guide != null:
+		return
+	GameState.seen_guide = true
+	_guide = InfoPanel.new()
+	_guide.name = "GuidePanel"
+	add_child(_guide)
+	_guide.setup("조작 방법", [UiKit.CONTROLS_TEXT], "시작")
+	_guide.closed.connect(_close_guide)
+	get_tree().paused = true
+
+
+func _close_guide() -> void:
+	if _guide:
+		_guide.queue_free()
+		_guide = null
+	get_tree().paused = false
+	SaveGame.autosave()
 
 
 func _update_hint() -> void:
@@ -165,6 +228,7 @@ func _on_investigated(new_ids: Array) -> void:
 	for id in new_ids:
 		names.append(book.all[id]["source"])
 	_show_toast("단서 획득: %s   (%d/%d)" % [", ".join(names), book.count(), book.total()])
+	SaveGame.autosave()
 
 
 func _show_toast(text: String) -> void:
@@ -191,6 +255,7 @@ func _close_notebook() -> void:
 		_notebook.queue_free()
 		_notebook = null
 	get_tree().paused = false
+	SaveGame.autosave()   # 수첩에서 바꾼 믿음/의심, 연결, 추론 카드를 저장
 
 
 func _load_enemies() -> Dictionary:
@@ -252,6 +317,7 @@ func _on_report_finished() -> void:
 		_report.queue_free()
 		_report = null
 	get_tree().paused = false
+	SaveGame.autosave()
 	get_tree().reload_current_scene()   # 단서·보급품은 GameState에 남아 있다
 
 

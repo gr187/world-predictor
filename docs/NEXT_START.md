@@ -15,6 +15,8 @@
   - 보고서 시스템: 귀환 장치(맵 끝, E) 또는 전투 패배 시 보고 화면 → 원인 선택 → 근거 카드 첨부 → 등급·한 줄 코멘트·힌트 → 보급품 선택 → 새 시뮬레이션. B 이상이면 다음 세계 해금 안내(세계 2·3은 아직 없음). 점수 계산은 `scripts/report_logic.gd`, 설정은 `data/report.json`. 설계는 `design/03_보고서_설계.md`
   - 이동 장치 4종(사다리 W/S, 크랭크 승강기 E, 스파크 구간, 전력 레버·전자문)과 맵 상태 규칙(전력 레버는 매 판 초기화, 지름길은 영구). 시험장: `godot --path game scenes/gym.tscn` (R로 새 판). 맵 제작 도구는 `scripts/level_kit.gd`. 설계는 `design/04_세계1_레벨_설계.md`
   - **연속 맵 조립**: 글자 격자 구역 파일(`data/world1/*.txt` + `world.json`)을 읽어 하나의 큰 맵으로 만든다(`world_data.gd`, `world_builder.gd`, 장면 `scenes/world1.tscn`). 지금은 거리 + 병원 두 구역. 도달 가능성 자동 검사(`world_nav.gd`). 승강기는 정류장에서 E로 부를 수 있음. 실행: `godot --path game scenes/world1.tscn`
+  - **타이틀·인트로·조작 안내·일시정지·저장**: 프로젝트 기본 장면은 이제 `scenes/title.tscn`(시작하기/이어하기/조작 방법/종료). 새로 시작하면 인트로(상사 소개 3쪽) → 세계 1 → 처음 한 번 조작 안내. Esc로 일시정지(계속하기/조작 방법/처음 화면으로/게임 종료). 진행 상황은 `user://save.json`에 자동 저장(`save_game.gd`: 단서·표시·연결·카드·해금·등급·보급품·지름길·안내 확인 여부). 깨진 파일은 거부하고 안내. 타이틀을 거쳐 시작했을 때만 자동 저장이 켜지므로(`SaveGame.autosave_enabled`) 테스트와 `scenes/world1.tscn` 직접 실행은 저장하지 않는다.
+  - 그래픽 시안용 Retro Diffusion 프롬프트: `art/retro_diffusion_prompts.md`. 사용자가 `art/concepts/`에 시안을 넣으면 그에 맞춰 그래픽 작업 시작.
 - 임시 처리 (스토리 확정 후 바꿀 것)
   - 단서와 전투 징후의 연결: 지금은 F1 키로 징후 단계(0/1)를 수동 전환. 연결 규칙은 사용자가 나중에 확정하기로 함.
   - 처치 보상, 전투 후 맵의 적 처리: 이기면 적이 사라지고, 지면 시뮬레이션 재시작
@@ -33,8 +35,8 @@
 - 엔진: Godot 4.7.2 (winget 설치). 내보내기 템플릿 설치됨.
 - 실행 파일: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64.exe`
   - 콘솔판: 같은 폴더의 `..._win64_console.exe`
-- 게임 실행: `Godot_v4.7.2-stable_win64.exe --path game --windowed`
-- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis, test_report, test_mechanics, test_dialogue_addon, test_world
+- 게임 실행: `Godot_v4.7.2-stable_win64.exe --path game --windowed` (타이틀 화면부터 시작). 세계 1만 바로 보려면 끝에 `scenes/world1.tscn`, 장치 시험장은 `scenes/gym.tscn`.
+- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis, test_report, test_mechanics, test_dialogue_addon, test_world, test_save, test_menus
 - GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe` (gr187로 로그인됨)
 - 유료 AI API는 사용 불가.
 

@@ -5,6 +5,7 @@ extends Area2D
 signal message(text: String)
 
 const GameState := preload("res://scripts/game_state.gd")
+const SaveGame := preload("res://scripts/save_game.gd")
 
 var flag_name := "lever_a"
 var permanent := false
@@ -83,6 +84,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		message.emit("이미 올려 둔 레버다.")
 		return
 	GameState.set_flag(flag_name, permanent)
+	if permanent:
+		SaveGame.autosave()   # 지름길은 죽어도 유지되므로 저장한다
 	_refresh()
 	if not is_power_lever:
 		message.emit("어디선가 잠금이 풀리는 소리가 났다. (지름길이 열렸다)")

@@ -15,12 +15,19 @@ static var pending_supplies: Array = []  ## 보고에서 받은, 다음 시뮬�
 static var active_supplies: Array = []   ## 지금 시뮬레이션에 적용 중인 보급품
 static var run_flags: Dictionary = {}        ## 이번 시뮬레이션에서만 유효한 맵 상태 (전력 레버 등)
 static var permanent_flags: Dictionary = {}  ## 죽어도 유지되는 맵 상태 (열쇠로 연 지름길 등)
+static var seen_guide := false         ## 조작 안내를 이미 봤는가 (저장됨)
+static var pending_guide := false      ## 이번에 장면이 시작될 때 조작 안내를 띄울 것인가 (저장 안 됨, 타이틀이 설정)
 
 
 static func get_book() -> RefCounted:
 	if _book == null:
 		_book = ClueBook.new()
 	return _book
+
+
+## 저장 파일을 불러올 때 수첩을 통째로 바꾼다.
+static func set_book(book: RefCounted) -> void:
+	_book = book
 
 
 ## 새 시뮬레이션이 시작될 때: 받아 둔 보급품을 적용하고, 이번 판 맵 상태를 초기화한다.
@@ -75,3 +82,5 @@ static func reset() -> void:
 	active_supplies = []
 	run_flags = {}
 	permanent_flags = {}
+	seen_guide = false
+	pending_guide = false

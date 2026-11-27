@@ -9,6 +9,7 @@ enum Step { CAUSE, EVIDENCE, RESULT, SUPPLY, DONE }
 
 const ReportLogic := preload("res://scripts/report_logic.gd")
 const GameState := preload("res://scripts/game_state.gd")
+const SaveGame := preload("res://scripts/save_game.gd")
 const MAX_CARDS := 3
 
 var book
@@ -294,6 +295,7 @@ func _submit() -> void:
 	if result["passed"]:
 		unlocked_now = GameState.unlock_next_world()
 	_checked_supplies.clear()
+	SaveGame.autosave()   # 등급과 해금 상태 저장
 	_enter(Step.RESULT)
 
 
@@ -324,6 +326,7 @@ func _confirm_supplies() -> void:
 		_msg.text = "보급품을 %d개 골라야 한다." % _supply_limit()
 		return
 	GameState.pending_supplies = _checked_supplies.duplicate()
+	SaveGame.autosave()   # 받은 보급품 저장
 	_enter(Step.DONE)
 
 

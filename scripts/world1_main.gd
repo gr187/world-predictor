@@ -24,6 +24,10 @@ func _build_level() -> void:
 func _build_hud() -> void:
 	super._build_hud()
 	_check_zone()
+	# 타이틀에서 막 들어왔고 아직 조작 안내를 보지 않았다면 한 번 보여 준다.
+	if GameState.pending_guide:
+		GameState.pending_guide = false
+		_show_guide.call_deferred()
 
 
 func _physics_process(_delta: float) -> void:
