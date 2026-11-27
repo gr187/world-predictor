@@ -39,6 +39,8 @@ func _init() -> void:
 	ui.logic.enemy_hp = 1
 	var guard := 0
 	while not ui.logic.over and guard < 60:
+		ui.logic.set_offer_for_test(["attack", "defend", "dodge"])
+		ui.logic.focus = 5
 		ui.choose("attack")
 		guard += 1
 	check("전투가 승리로 끝남", ui.logic.over and ui.logic.winner == "player")

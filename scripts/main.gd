@@ -4,14 +4,20 @@ extends Node2D
 const PlayerScript := preload("res://scripts/player.gd")
 const EnemyScript := preload("res://scripts/enemy.gd")
 const BattleUI := preload("res://scripts/battle_ui.gd")
+const PointScript := preload("res://scripts/investigation_point.gd")
+const NotebookUI := preload("res://scripts/notebook_ui.gd")
+const GameState := preload("res://scripts/game_state.gd")
 
 const LEVEL_WIDTH := 1800
 const FLOOR_Y := 240
 
 var player: CharacterBody2D
 var enemies_data: Dictionary = {}
-var clue_level := 0   ## 테스트용: F1로 전환. 나중에는 단서 수첩에서 계산한다.
+var clue_level := 0   ## 임시: F1로 전환. 단서와의 연결 규칙은 나중에 확정한다.
 var hint: Label
+var toast: Label
+var _toast_tween: Tween
+var _notebook: CanvasLayer
 
 
 func _ready() -> void:
@@ -60,23 +66,80 @@ func _ready() -> void:
 	_spawn_enemy("guard_robot", 330, 260, 440)
 	_spawn_enemy("guard_robot", 1300, 1250, 1450)
 
+	# 테스트용 조사 지점: 단서 16개를 맵에 일렬로 배치한다. (실제 세계 1 구역 배치는 레벨 단계에서)
+	var ids: Array = GameState.get_book().all.keys()
+	for i in ids.size():
+		_spawn_point([ids[i]], 100.0 + 105.0 * i)
+
 	hint = Label.new()
 	hint.position = Vector2(8, 6)
+	hint.add_theme_font_size_override("font_size", 10)
+	toast = Label.new()
+	toast.position = Vector2(40, 30)
+	toast.size = Vector2(400, 20)
+	toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	toast.add_theme_font_size_override("font_size", 11)
+	toast.modulate.a = 0.0
 	var layer := CanvasLayer.new()
 	layer.add_child(hint)
+	layer.add_child(toast)
 	add_child(layer)
 	_update_hint()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# 테스트용: 단서 단계 전환 (0=모호한 징후, 1=구체적인 징후)
+	# 임시: 전투 징후 단계 전환 (0=모호한 징후, 1=구체적인 징후)
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
 		clue_level = 1 - clue_level
 		_update_hint()
+	elif event.is_action_pressed("notebook") and not get_tree().paused:
+		_open_notebook()
 
 
 func _update_hint() -> void:
-	hint.text = "A/D 이동   Space 점프   적에게 닿으면 전투   [F1] 단서 단계: %d" % clue_level
+	hint.text = "A/D 이동  Space 점프  E 조사  Q 수첩  [F1] 징후 단계(임시): %d" % clue_level
+
+
+func _spawn_point(ids: Array, x: float) -> void:
+	var p := PointScript.new()
+	p.clue_ids = ids
+	p.position = Vector2(x, FLOOR_Y - 8)
+	p.investigated.connect(_on_investigated)
+	add_child(p)
+
+
+func _on_investigated(new_ids: Array) -> void:
+	var book = GameState.get_book()
+	var names: Array = []
+	for id in new_ids:
+		names.append(book.all[id]["source"])
+	_show_toast("단서 획득: %s   (%d/%d)" % [", ".join(names), book.count(), book.total()])
+
+
+func _show_toast(text: String) -> void:
+	toast.text = text
+	toast.modulate.a = 1.0
+	if _toast_tween:
+		_toast_tween.kill()
+	_toast_tween = create_tween()
+	_toast_tween.tween_interval(2.2)
+	_toast_tween.tween_property(toast, "modulate:a", 0.0, 0.6)
+
+
+func _open_notebook() -> void:
+	_notebook = NotebookUI.new()
+	_notebook.name = "Notebook"
+	add_child(_notebook)
+	_notebook.setup(GameState.get_book())
+	_notebook.closed.connect(_close_notebook)
+	get_tree().paused = true
+
+
+func _close_notebook() -> void:
+	if _notebook:
+		_notebook.queue_free()
+		_notebook = null
+	get_tree().paused = false
 
 
 func _load_enemies() -> Dictionary:
