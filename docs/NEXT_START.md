@@ -12,6 +12,7 @@
   - 전투 확장: 매 턴 선택지 3개가 랜덤으로 바뀜(공격·방어·회피·강타·치료), 자원 "집중"(행동별 비용), 5초 원형 타이머, 시간 종료 시 화면의 선택지 중 랜덤 자동 선택. 스토리용 고정 선택지는 적 데이터 `options.fixed`로 지정
   - 조사 지점(E)과 단서 수첩(Q), 세계 1 단서 16개 `data/clues.json`, 장면 재시작 후에도 단서 유지
   - 단서 분석(수첩 안): 믿음/보류/의심 표시(Z/X/C), 단서 연결 모순/뒷받침(V), 추론 카드 만들기(R: 단서 2~3개 + 결론 후보 선택), 카드 목록(Tab, 삭제 Del). 결론 후보는 `data/inferences.json`(참 5개, 거짓 3개). 수첩은 정답 여부를 알려 주지 않으며, `ClueBook.evaluate_card()`가 보고서 단계에서 쓸 평가("valid"/"unsupported"/"wrong")를 이미 제공함
+  - 보고서 시스템: 귀환 장치(맵 끝, E) 또는 전투 패배 시 보고 화면 → 원인 선택 → 근거 카드 첨부 → 등급·한 줄 코멘트·힌트 → 보급품 선택 → 새 시뮬레이션. B 이상이면 다음 세계 해금 안내(세계 2·3은 아직 없음). 점수 계산은 `scripts/report_logic.gd`, 설정은 `data/report.json`. 설계는 `design/03_보고서_설계.md`
 - 임시 처리 (스토리 확정 후 바꿀 것)
   - 단서와 전투 징후의 연결: 지금은 F1 키로 징후 단계(0/1)를 수동 전환. 연결 규칙은 사용자가 나중에 확정하기로 함.
   - 처치 보상, 전투 후 맵의 적 처리: 이기면 적이 사라지고, 지면 시뮬레이션 재시작
@@ -31,7 +32,7 @@
 - 실행 파일: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64.exe`
   - 콘솔판: 같은 폴더의 `..._win64_console.exe`
 - 게임 실행: `Godot_v4.7.2-stable_win64.exe --path game --windowed`
-- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis
+- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis, test_report
 - GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe` (gr187로 로그인됨)
 - 유료 AI API는 사용 불가.
 
@@ -45,15 +46,14 @@
 - 모든 결정은 사용자에게 검증받고 진행한다.
 
 ## 다음에 할 일 (제안 순서)
-1. **보고서 시스템**(추천 다음 단계): 귀환 후 상사에게 보고. 원인 후보 선택, 근거 카드/단서 첨부, 믿지 않은 단서 표시, 아직 모르는 것 선택. 평가에는 `ClueBook.evaluate_card()`와 단서의 숨은 신뢰도(`truth`)와 플레이어의 믿음/의심 표시를 쓴다. 결과에 따라 보급품·힌트·다음 시뮬 조건이 달라짐.
-2. 세계 1 레벨: 구역 5~7개로 나눠 단서·적·인물 배치, 맵 난이도(오르기·잠수 등)
+1. **세계 1 실제 레벨**(추천 다음 단계): 지금의 일렬 테스트 맵을 설계 문서의 구역 7개(거리, 지하철, 병원, 물류센터, 배전소, 시청·방송국, 관측소)로 바꾸고, 단서 16개와 적·인물을 배치. 맵 난이도(오르기·잠수 등)도 이때 정함. 보고서 힌트 문장도 실제 구역에 맞춰 다듬기.
+2. (보류) 단서와 전투 징후 단계의 연결 규칙 — 사용자가 나중에 확정하기로 함
 3. 대화/선택: 생존자 증언 단서, 적과의 대화(싸움·대화·회피)
-4. 보고서 시스템(귀환 후 상사에게 보고)
-5. 현실 거점(작은 3D 사무실), 물품 선택
-6. 세계 2·3 콘텐츠 추가
-7. 컨셉아트 시안 → 확인 → 그래픽·사운드 적용, 도트화 연출
-8. 빌드(`dist`): `data/*.json`이 내보내기에 포함되도록 설정 필요
-9. 저장 기능(현재 단서는 게임을 끄면 사라짐)
+4. 현실 거점(작은 3D 사무실), 물품 선택 (지금은 보고 화면 하나로 대체)
+5. 세계 2·3 콘텐츠 추가 (보고서용 원인 후보·추론 결론·단서·힌트 데이터 포함)
+6. 컨셉아트 시안 → 확인 → 그래픽·사운드 적용, 도트화 연출
+7. 빌드(`dist`): `data/*.json`이 내보내기에 포함되도록 설정 필요
+8. 저장 기능(현재 단서·표시·카드·해금 상태는 게임을 끄면 사라짐)
 
 ## 새 세션 시작 방법
 1. 이 파일과 설계 문서 2개를 읽는다.

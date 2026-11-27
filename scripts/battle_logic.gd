@@ -27,6 +27,8 @@ const ACTIONS := {
 var rng := RandomNumberGenerator.new()
 var data: Dictionary
 var clue_level := 0          ## 0=모호한 징후, 1 이상=구체적인 징후
+var max_hp := PLAYER_MAX_HP    ## 보급품(방호복)으로 늘어날 수 있다
+var heal_amount := HEAL_AMOUNT ## 보급품(응급 키트)으로 늘어날 수 있다
 var player_hp := PLAYER_MAX_HP
 var enemy_hp := 0
 var focus := FOCUS_START
@@ -41,10 +43,18 @@ var tell_text := ""
 var offer: Array = []        ## 이번 턴에 화면에 나오는 선택지 id
 
 
-func _init(enemy_data: Dictionary, clue: int = 0, seed_value: int = -1) -> void:
+## supplies: 보급품 id 목록 ("suit" 최대 체력 +1, "battery" 시작 집중 +2, "kit" 치료량 +1)
+func _init(enemy_data: Dictionary, clue: int = 0, seed_value: int = -1, supplies: Array = []) -> void:
 	data = enemy_data
 	clue_level = clue
 	enemy_hp = int(data["hp"])
+	if supplies.has("suit"):
+		max_hp += 1
+	if supplies.has("kit"):
+		heal_amount += 1
+	if supplies.has("battery"):
+		focus = mini(focus + 2, FOCUS_MAX)
+	player_hp = max_hp
 	if seed_value >= 0:
 		rng.seed = seed_value
 	else:
@@ -65,7 +75,7 @@ func is_usable(id: String) -> bool:
 		return false
 	if int(ACTIONS[id]["cost"]) > focus:
 		return false
-	if id == "heal" and player_hp >= PLAYER_MAX_HP:
+	if id == "heal" and player_hp >= max_hp:
 		return false
 	return true
 
@@ -88,7 +98,7 @@ func roll_offer() -> void:
 	var ids: Array = ACTIONS.keys()
 	var candidates: Array = []
 	for id in ids:
-		if id == "heal" and player_hp >= PLAYER_MAX_HP:
+		if id == "heal" and player_hp >= max_hp:
 			continue
 		candidates.append(id)
 	# 무작위로 섞은 뒤 앞에서 OFFER_SIZE개를 고른다.
@@ -243,7 +253,7 @@ func _resolve(player_action: String, timed_out: bool) -> Dictionary:
 	# 치료는 피해보다 먼저 적용한다.
 	var healed := 0
 	if player_action == "heal":
-		healed = mini(HEAL_AMOUNT, PLAYER_MAX_HP - player_hp)
+		healed = mini(heal_amount, max_hp - player_hp)
 		player_hp += healed
 		if healed > 0:
 			lines.append("체력을 %d 회복했다." % healed)

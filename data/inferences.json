@@ -1,10 +1,10 @@
 {
-	"s1_inf_attack": {"world": 1, "text": "적국의 전자기 공격이 전력망을 무너뜨렸다.", "valid": false, "requires": []},
-	"s1_inf_structure": {"world": 1, "text": "변압기 방호 설비가 없었던 것이 피해를 키운 구조적 원인이다.", "valid": true, "requires": [["s1_d", "s1_p"]]},
-	"s1_inf_held": {"world": 1, "text": "전력망은 폭풍 이후에도 72시간 동안 버텼다.", "valid": false, "requires": []},
-	"s1_inf_warning": {"world": 1, "text": "폭풍 경보는 있었지만 시스템이 그것을 무시했다.", "valid": true, "requires": [["s1_e", "s1_o"]]},
-	"s1_inf_sabotage": {"world": 1, "text": "정부가 일부러 전기를 끊었다.", "valid": false, "requires": []},
-	"s1_inf_coverup": {"world": 1, "text": "정부의 공식 발표는 실제 피해를 의도적으로 축소했다.", "valid": true, "requires": [["s1_l", "s1_k"], ["s1_a", "s1_l"]]},
-	"s1_inf_fuel": {"world": 1, "text": "병원의 연료 부족은 저장 기준을 지키지 않았기 때문이다.", "valid": true, "requires": [["s1_g", "s1_h"]]},
-	"s1_inf_natural": {"world": 1, "text": "피해의 양상은 자연 현상인 자기 폭풍의 특징과 일치한다.", "valid": true, "requires": [["s1_f", "s1_i"], ["s1_f", "s1_b"]]}
+	"s1_inf_attack": {"world": 1, "text": "적국의 전자기 공격이 전력망을 무너뜨렸다.", "valid": false, "requires": [], "supports": []},
+	"s1_inf_structure": {"world": 1, "text": "변압기 방호 설비가 없었던 것이 피해를 키운 구조적 원인이다.", "valid": true, "requires": [["s1_d", "s1_p"]], "supports": ["storm_gap", "aging"]},
+	"s1_inf_held": {"world": 1, "text": "전력망은 폭풍 이후에도 72시간 동안 버텼다.", "valid": false, "requires": [], "supports": []},
+	"s1_inf_warning": {"world": 1, "text": "폭풍 경보는 있었지만 시스템이 그것을 무시했다.", "valid": true, "requires": [["s1_e", "s1_o"]], "supports": ["storm_gap"]},
+	"s1_inf_sabotage": {"world": 1, "text": "정부가 일부러 전기를 끊었다.", "valid": false, "requires": [], "supports": []},
+	"s1_inf_coverup": {"world": 1, "text": "정부의 공식 발표는 실제 피해를 의도적으로 축소했다.", "valid": true, "requires": [["s1_l", "s1_k"], ["s1_a", "s1_l"]], "supports": ["storm_gap"]},
+	"s1_inf_fuel": {"world": 1, "text": "병원의 연료 부족은 저장 기준을 지키지 않았기 때문이다.", "valid": true, "requires": [["s1_g", "s1_h"]], "supports": ["storm_gap"]},
+	"s1_inf_natural": {"world": 1, "text": "피해의 양상은 자연 현상인 자기 폭풍의 특징과 일치한다.", "valid": true, "requires": [["s1_f", "s1_i"], ["s1_f", "s1_b"]], "supports": ["storm_gap", "storm_only"]}
 }

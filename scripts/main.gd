@@ -7,6 +7,9 @@ const BattleUI := preload("res://scripts/battle_ui.gd")
 const PointScript := preload("res://scripts/investigation_point.gd")
 const NotebookUI := preload("res://scripts/notebook_ui.gd")
 const GameState := preload("res://scripts/game_state.gd")
+const ReportUI := preload("res://scripts/report_ui.gd")
+const ReturnPoint := preload("res://scripts/return_point.gd")
+const ReportLogic := preload("res://scripts/report_logic.gd")
 
 const LEVEL_WIDTH := 1800
 const FLOOR_Y := 240
@@ -18,9 +21,11 @@ var hint: Label
 var toast: Label
 var _toast_tween: Tween
 var _notebook: CanvasLayer
+var _report: CanvasLayer
 
 
 func _ready() -> void:
+	GameState.begin_simulation()   # 보고에서 받은 보급품을 이번 시뮬레이션에 적용
 	enemies_data = _load_enemies()
 
 	var bg := ColorRect.new()
@@ -66,6 +71,12 @@ func _ready() -> void:
 	_spawn_enemy("guard_robot", 330, 260, 440)
 	_spawn_enemy("guard_robot", 1300, 1250, 1450)
 
+	# 귀환 장치: 맵 끝에서 시뮬레이션을 마치고 보고하러 돌아간다.
+	var ret := ReturnPoint.new()
+	ret.position = Vector2(1765, FLOOR_Y - 12)
+	ret.activated.connect(_open_report.bind("return"))
+	add_child(ret)
+
 	# 테스트용 조사 지점: 단서 16개를 맵에 일렬로 배치한다. (실제 세계 1 구역 배치는 레벨 단계에서)
 	var ids: Array = GameState.get_book().all.keys()
 	for i in ids.size():
@@ -98,6 +109,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _update_hint() -> void:
 	hint.text = "A/D 이동  Space 점프  E 조사  Q 수첩  [F1] 징후 단계(임시): %d" % clue_level
+	if not GameState.active_supplies.is_empty():
+		var rl := ReportLogic.new()
+		var names: Array = []
+		for id in GameState.active_supplies:
+			names.append(rl.supply_name(id))
+		hint.text += "\n보급품: " + ", ".join(names)
 
 
 func _spawn_point(ids: Array, x: float) -> void:
@@ -170,7 +187,7 @@ func _on_enemy_touched(enemy: Area2D) -> void:
 	var ui := BattleUI.new()
 	ui.name = "BattleUI"
 	add_child(ui)
-	ui.setup(data, clue_level)
+	ui.setup(data, clue_level, GameState.active_supplies)
 	ui.finished.connect(_on_battle_finished.bind(enemy, ui))
 	get_tree().paused = true
 
@@ -181,7 +198,27 @@ func _on_battle_finished(won: bool, enemy: Area2D, ui: CanvasLayer) -> void:
 	if won:
 		enemy.queue_free()   # 임시: 이긴 적은 사라진다 (스토리 확정 후 변경)
 	else:
-		get_tree().reload_current_scene()   # 임시: 현실 귀환 대신 시뮬레이션 재시작
+		_open_report("defeat")   # 강제 종료되어 현실로 돌아와 보고한다
+
+
+## 현실로 돌아와 상사에게 보고한다. 끝나면 새 시뮬레이션을 시작한다.
+func _open_report(reason: String) -> void:
+	if _report != null or get_tree().paused:
+		return
+	_report = ReportUI.new()
+	_report.name = "ReportUI"
+	add_child(_report)
+	_report.setup(GameState.get_book(), reason)
+	_report.finished.connect(_on_report_finished)
+	get_tree().paused = true
+
+
+func _on_report_finished() -> void:
+	if _report:
+		_report.queue_free()
+		_report = null
+	get_tree().paused = false
+	get_tree().reload_current_scene()   # 단서·보급품은 GameState에 남아 있다
 
 
 func _platform(rect: Rect2, surface := "normal") -> void:

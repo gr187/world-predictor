@@ -20,7 +20,8 @@ func _init() -> void:
 	var bad: Array = []
 	for id in book.all:
 		var c: Dictionary = book.all[id]
-		var good: bool = c.has_all(["world", "type", "source", "time", "text", "truth"]) \
+		var good: bool = c.has_all(["world", "type", "source", "time", "text", "truth", "hint"]) \
+			and str(c["hint"]).length() > 0 \
 			and c["type"] in ClueBook.TYPES \
 			and c["time"] in ClueBook.TIMES \
 			and c["truth"] in ClueBook.TRUTHS \

@@ -46,7 +46,7 @@ func _init() -> void:
 	check("처음엔 조사하지 않은 상태", not p.is_done() and book.count() == 0)
 
 	# 멀리 있을 때 E를 눌러도 아무 일 없음
-	main.player.global_position = Vector2(1770, 200)   # 마지막 조사 지점(x=1675)에서 충분히 먼 곳
+	main.player.global_position = Vector2(1640, 200)   # 조사 지점(x=1570, 1675)과 귀환 장치(x=1765)에서 모두 먼 곳
 	for i in 5:
 		await physics_frame
 	await press("interact")

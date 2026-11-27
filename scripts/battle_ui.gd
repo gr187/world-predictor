@@ -26,10 +26,10 @@ var _buttons: Array[Button] = []
 var _continue: Button
 
 
-func setup(enemy_data: Dictionary, clue_level: int) -> void:
+func setup(enemy_data: Dictionary, clue_level: int, supplies: Array = []) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 10
-	logic = BattleLogic.new(enemy_data, clue_level)
+	logic = BattleLogic.new(enemy_data, clue_level, -1, supplies)
 
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.82)
@@ -106,7 +106,7 @@ func _begin_turn() -> void:
 func _refresh_status() -> void:
 	_enemy_label.text = "%s   HP %d" % [logic.data["name"], logic.enemy_hp]
 	_player_label.text = "HP %d / %d      집중 %d / %d" % [
-		logic.player_hp, logic.PLAYER_MAX_HP, logic.focus, logic.FOCUS_MAX]
+		logic.player_hp, logic.max_hp, logic.focus, logic.FOCUS_MAX]
 
 
 func _process(delta: float) -> void:
