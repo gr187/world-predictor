@@ -27,7 +27,13 @@ var _report: CanvasLayer
 func _ready() -> void:
 	GameState.begin_simulation()   # 보고에서 받은 보급품을 이번 시뮬레이션에 적용
 	enemies_data = _load_enemies()
+	_build_level()
+	_build_hud()
 
+
+## 레벨(바닥, 플레이어, 카메라, 적, 조사 지점, 귀환 장치)을 만든다.
+## 기본은 일렬 테스트 맵이고, 실제 세계 맵은 이 함수를 바꿔서 쓴다. (world1_main.gd)
+func _build_level() -> void:
 	var bg := ColorRect.new()
 	bg.color = Color(0.07, 0.07, 0.09)
 	bg.position = Vector2(-200, -400)
@@ -82,6 +88,9 @@ func _ready() -> void:
 	for i in ids.size():
 		_spawn_point([ids[i]], 100.0 + 105.0 * i)
 
+
+## 화면 표시(안내 문구, 알림)를 만든다.
+func _build_hud() -> void:
 	hint = Label.new()
 	hint.position = Vector2(8, 6)
 	hint.add_theme_font_size_override("font_size", 10)
@@ -118,11 +127,36 @@ func _update_hint() -> void:
 
 
 func _spawn_point(ids: Array, x: float) -> void:
+	_spawn_point_at(ids, Vector2(x, FLOOR_Y - 8))
+
+
+func _spawn_point_at(ids: Array, pos: Vector2) -> Area2D:
 	var p := PointScript.new()
 	p.clue_ids = ids
-	p.position = Vector2(x, FLOOR_Y - 8)
+	p.position = pos
 	p.investigated.connect(_on_investigated)
 	add_child(p)
+	return p
+
+
+## 맵 로더가 쓰는 배치 함수들 (위치는 중심 좌표)
+func _spawn_enemy_at(id: String, pos: Vector2, half_range: float) -> Area2D:
+	var e := EnemyScript.new()
+	e.enemy_id = id
+	e.position = pos
+	e.patrol_min = pos.x - half_range
+	e.patrol_max = pos.x + half_range
+	e.touched.connect(_on_enemy_touched)
+	add_child(e)
+	return e
+
+
+func _spawn_return_at(pos: Vector2) -> Area2D:
+	var ret := ReturnPoint.new()
+	ret.position = pos
+	ret.activated.connect(_open_report.bind("return"))
+	add_child(ret)
+	return ret
 
 
 func _on_investigated(new_ids: Array) -> void:

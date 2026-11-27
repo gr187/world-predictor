@@ -1,0 +1,6 @@
+{
+	"zones": [
+		{"id": "street", "name": "정전된 거리", "file": "street.txt", "col": 0, "row": 0},
+		{"id": "hospital", "name": "병원", "file": "hospital.txt", "col": 56, "row": 0}
+	]
+}

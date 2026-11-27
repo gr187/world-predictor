@@ -34,6 +34,27 @@ static func platform(parent: Node, rect: Rect2, surface: String = "normal") -> S
 	return body
 
 
+## 한쪽 방향 발판: 아래에서 뛰어올라 통과할 수 있고 위에서는 설 수 있다.
+static func one_way(parent: Node, rect: Rect2) -> StaticBody2D:
+	var body := StaticBody2D.new()
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.position = rect.position
+	var shape := CollisionShape2D.new()
+	var rs := RectangleShape2D.new()
+	rs.size = rect.size
+	shape.shape = rs
+	shape.position = rect.size / 2.0
+	shape.one_way_collision = true
+	body.add_child(shape)
+	var vis := ColorRect.new()
+	vis.size = rect.size
+	vis.color = Color(0.35, 0.3, 0.22)
+	body.add_child(vis)
+	parent.add_child(body)
+	return body
+
+
 static func player(parent: Node, pos: Vector2) -> CharacterBody2D:
 	var p := CharacterBody2D.new()
 	p.set_script(PlayerScript)
