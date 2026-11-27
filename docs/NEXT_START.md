@@ -33,9 +33,16 @@
 - 실행 파일: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64.exe`
   - 콘솔판: 같은 폴더의 `..._win64_console.exe`
 - 게임 실행: `Godot_v4.7.2-stable_win64.exe --path game --windowed`
-- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis, test_report, test_mechanics
+- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis, test_report, test_mechanics, test_dialogue_addon
 - GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe` (gr187로 로그인됨)
 - 유료 AI API는 사용 불가.
+
+## 외부 라이브러리 (도입한 것)
+- **Dialogue Manager v4.2.0** (nathanhoad, MIT, Godot 4.6+). `addons/dialogue_manager/`에 원본 그대로 넣었고 라이선스 원문도 같은 폴더에 있다. 대화 파일(`.dialogue`)에서 우리 게임 함수를 조건(`[if has_clue("s1_f") /]`)과 동작(`$> give_clue("s1_c")`)으로 호출할 수 있다. 사용법과 우리 상태와의 연결 예는 `tests/test_dialogue_addon.gd` 참고.
+  - 검토 결과: 런타임 코드에 네트워크·외부 실행 호출 없음. 에디터 전용 코드(`components/`, `views/`)만 GitHub 업데이트 확인(HTTP)과 `OS.shell_open`을 쓰며 내보낼 때 제외된다. 에디터를 열 때 업데이트를 확인하므로 `user://dialogue_manager_user_config.json`에 `check_for_updates=false`를 넣어 두었다(이 파일은 저장소에 없고 PC마다 다름). 조건·동작 평가에 `Expression`을 쓰므로 **신뢰할 수 없는 대화 파일은 불러오지 않는다**(우리가 쓴 파일만 사용).
+  - 업데이트는 직접 하지 않는다. 새 버전이 필요하면 별도 폴더에 받아 같은 방식으로 검토한다.
+- 검토용 복사본은 저장소 밖 `..\_external_review\`에 있다(지워도 됨).
+- 사다리·스파크·레버·승강기를 주는 외부 애드온은 마땅한 것이 없어 직접 구현했다.
 
 ## 확정된 결정
 - 조작: A/D 이동, Space 점프, W/S 사다리, E 조사·조작, Q 수첩, 전투는 1/2/3 또는 마우스(5초 안에 선택)
