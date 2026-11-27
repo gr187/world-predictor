@@ -13,6 +13,7 @@
   - 조사 지점(E)과 단서 수첩(Q), 세계 1 단서 16개 `data/clues.json`, 장면 재시작 후에도 단서 유지
   - 단서 분석(수첩 안): 믿음/보류/의심 표시(Z/X/C), 단서 연결 모순/뒷받침(V), 추론 카드 만들기(R: 단서 2~3개 + 결론 후보 선택), 카드 목록(Tab, 삭제 Del). 결론 후보는 `data/inferences.json`(참 5개, 거짓 3개). 수첩은 정답 여부를 알려 주지 않으며, `ClueBook.evaluate_card()`가 보고서 단계에서 쓸 평가("valid"/"unsupported"/"wrong")를 이미 제공함
   - 보고서 시스템: 귀환 장치(맵 끝, E) 또는 전투 패배 시 보고 화면 → 원인 선택 → 근거 카드 첨부 → 등급·한 줄 코멘트·힌트 → 보급품 선택 → 새 시뮬레이션. B 이상이면 다음 세계 해금 안내(세계 2·3은 아직 없음). 점수 계산은 `scripts/report_logic.gd`, 설정은 `data/report.json`. 설계는 `design/03_보고서_설계.md`
+  - 이동 장치 4종(사다리 W/S, 크랭크 승강기 E, 스파크 구간, 전력 레버·전자문)과 맵 상태 규칙(전력 레버는 매 판 초기화, 지름길은 영구). 시험장: `godot --path game scenes/gym.tscn` (R로 새 판). 맵 제작 도구는 `scripts/level_kit.gd`. 설계는 `design/04_세계1_레벨_설계.md`
 - 임시 처리 (스토리 확정 후 바꿀 것)
   - 단서와 전투 징후의 연결: 지금은 F1 키로 징후 단계(0/1)를 수동 전환. 연결 규칙은 사용자가 나중에 확정하기로 함.
   - 처치 보상, 전투 후 맵의 적 처리: 이기면 적이 사라지고, 지면 시뮬레이션 재시작
@@ -32,12 +33,12 @@
 - 실행 파일: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64.exe`
   - 콘솔판: 같은 폴더의 `..._win64_console.exe`
 - 게임 실행: `Godot_v4.7.2-stable_win64.exe --path game --windowed`
-- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis, test_report
+- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis, test_report, test_mechanics
 - GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe` (gr187로 로그인됨)
 - 유료 AI API는 사용 불가.
 
 ## 확정된 결정
-- 조작: A/D 이동, Space 점프, E 조사, Q 수첩, 전투는 1/2/3 또는 마우스(5초 안에 선택)
+- 조작: A/D 이동, Space 점프, W/S 사다리, E 조사·조작, Q 수첩, 전투는 1/2/3 또는 마우스(5초 안에 선택)
 - 해상도: 480x270을 임시 사용. 최종 도트 크기는 그래픽 단계에서 확정.
 - 이동·점프 수치는 현재 값 유지. 환경별(비, 진흙 등)로는 다르게 한다.
 - 전투: 실시간 아님. 메뉴식 확률 전투, 징후는 문장으로만, 단서를 모을수록 징후가 구체적. 손맛은 탐험(맵 난이도, 오르기·잠수 등)에서.
@@ -46,7 +47,7 @@
 - 모든 결정은 사용자에게 검증받고 진행한다.
 
 ## 다음에 할 일 (제안 순서)
-1. **세계 1 실제 레벨**(추천 다음 단계): 지금의 일렬 테스트 맵을 설계 문서의 구역 7개(거리, 지하철, 병원, 물류센터, 배전소, 시청·방송국, 관측소)로 바꾸고, 단서 16개와 적·인물을 배치. 맵 난이도(오르기·잠수 등)도 이때 정함. 보고서 힌트 문장도 실제 구역에 맞춰 다듬기.
+1. **세계 1 실제 레벨**(추천 다음 단계): 사용자가 정한 **하나의 큰 연속 맵**으로, 먼저 거리 + 병원 두 구역을 글자 격자 맵으로 이어 붙여 조립 방식·카메라를 검증한 뒤 나머지 5개 구역을 추가. 이동 장치는 이미 있음(위 완료 항목). 단서 16개와 적·인물 배치, 도달 가능성 자동 검사, 보고서 힌트 문장을 실제 구역에 맞춰 다듬기. 자세한 순서는 `design/04_세계1_레벨_설계.md` 7~8, 10번.
 2. (보류) 단서와 전투 징후 단계의 연결 규칙 — 사용자가 나중에 확정하기로 함
 3. 대화/선택: 생존자 증언 단서, 적과의 대화(싸움·대화·회피)
 4. 현실 거점(작은 3D 사무실), 물품 선택 (지금은 보고 화면 하나로 대체)
