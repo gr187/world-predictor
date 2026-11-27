@@ -79,8 +79,10 @@ func _init() -> void:
 	# 장면을 다시 불러와도 단서 유지 (죽었을 때 시뮬레이션 재시작과 같은 경로)
 	var old_main = main
 	reload_current_scene()
-	for i in 4:
+	var waited := 0
+	while (current_scene == null or current_scene == old_main) and waited < 30:
 		await physics_frame
+		waited += 1
 	var new_main = current_scene
 	check("장면이 새로 불러와짐", new_main != null and new_main != old_main)
 	check("재시작 후에도 단서 유지", GameState.get_book().count() == 1)

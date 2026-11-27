@@ -11,12 +11,14 @@
   - 메뉴식 확률 전투, 징후 문장, 적 데이터 `data/enemies.json`, 맵 접촉 시작 (텍스트 UI 플레이스홀더)
   - 전투 확장: 매 턴 선택지 3개가 랜덤으로 바뀜(공격·방어·회피·강타·치료), 자원 "집중"(행동별 비용), 5초 원형 타이머, 시간 종료 시 화면의 선택지 중 랜덤 자동 선택. 스토리용 고정 선택지는 적 데이터 `options.fixed`로 지정
   - 조사 지점(E)과 단서 수첩(Q), 세계 1 단서 16개 `data/clues.json`, 장면 재시작 후에도 단서 유지
+  - 단서 분석(수첩 안): 믿음/보류/의심 표시(Z/X/C), 단서 연결 모순/뒷받침(V), 추론 카드 만들기(R: 단서 2~3개 + 결론 후보 선택), 카드 목록(Tab, 삭제 Del). 결론 후보는 `data/inferences.json`(참 5개, 거짓 3개). 수첩은 정답 여부를 알려 주지 않으며, `ClueBook.evaluate_card()`가 보고서 단계에서 쓸 평가("valid"/"unsupported"/"wrong")를 이미 제공함
 - 임시 처리 (스토리 확정 후 바꿀 것)
   - 단서와 전투 징후의 연결: 지금은 F1 키로 징후 단계(0/1)를 수동 전환. 연결 규칙은 사용자가 나중에 확정하기로 함.
   - 처치 보상, 전투 후 맵의 적 처리: 이기면 적이 사라지고, 지면 시뮬레이션 재시작
   - 조사 지점 16개를 테스트 맵에 일렬로 배치(실제 구역 배치는 레벨 단계에서)
   - 단서의 시점(사건 전/중/후)은 설계 문서에 명시가 없어 제가 임의로 지정함. 확인 필요.
-- 미착수: 단서 분석(모순·믿음/의심·추론 카드), 대화/선택(싸움·대화·회피), 보고서, 현실 거점(3D), 세계 1 실제 레벨, 세계 2·3, 그래픽, 사운드, 빌드
+- 임시 처리 추가: 추론 결론 후보는 세계 1용만 있음. 믿음/의심 표시·연결·카드는 저장되지 않음(게임을 끄면 사라짐).
+- 미착수: 대화/선택(싸움·대화·회피), 보고서, 현실 거점(3D), 세계 1 실제 레벨, 세계 2·3, 그래픽, 사운드, 빌드
 
 ## 설계 문서
 - `..\design\01_세계관_단서_설계.md` (v0.2): 세계 3개의 장소, 단서, 모순, 추론 카드
@@ -29,7 +31,7 @@
 - 실행 파일: `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.7.2-stable_win64.exe`
   - 콘솔판: 같은 폴더의 `..._win64_console.exe`
 - 게임 실행: `Godot_v4.7.2-stable_win64.exe --path game --windowed`
-- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow
+- 테스트(콘솔판, `--headless --path game -s tests/<이름>.gd`): test_player, test_surface, test_battle, test_battle_flow, test_battle_timer, test_clues, test_investigation_flow, test_analysis
 - GitHub CLI: `C:\Program Files\GitHub CLI\gh.exe` (gr187로 로그인됨)
 - 유료 AI API는 사용 불가.
 
@@ -43,7 +45,7 @@
 - 모든 결정은 사용자에게 검증받고 진행한다.
 
 ## 다음에 할 일 (제안 순서)
-1. **단서 분석**: 수첩에서 단서 2개를 골라 "모순/뒷받침" 연결, 개별 단서에 "믿음/의심" 표시, 조합 시 추론 카드 생성 (설계 문서 4개 추론 카드 참고)
+1. **보고서 시스템**(추천 다음 단계): 귀환 후 상사에게 보고. 원인 후보 선택, 근거 카드/단서 첨부, 믿지 않은 단서 표시, 아직 모르는 것 선택. 평가에는 `ClueBook.evaluate_card()`와 단서의 숨은 신뢰도(`truth`)와 플레이어의 믿음/의심 표시를 쓴다. 결과에 따라 보급품·힌트·다음 시뮬 조건이 달라짐.
 2. 세계 1 레벨: 구역 5~7개로 나눠 단서·적·인물 배치, 맵 난이도(오르기·잠수 등)
 3. 대화/선택: 생존자 증언 단서, 적과의 대화(싸움·대화·회피)
 4. 보고서 시스템(귀환 후 상사에게 보고)
